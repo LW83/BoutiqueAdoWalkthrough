@@ -22,5 +22,5 @@ def add_to_bag(request, item_id):
         bag[item_id] = quantity
 
     request.session['bag'] = bag # Then overwriting item in the session with updated version 
-    print(request.session['bag'])
+    # print(request.session['bag']) - commented out as was only included to test items were being added to the bag
     return redirect(redirect_url)
