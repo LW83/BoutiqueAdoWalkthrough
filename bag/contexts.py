@@ -6,6 +6,8 @@ from products.models import Product
 # Function to return dictionary called context - known as context processor
 # Purpose is to make dictionary available to all template in entire application similar to request.user
 # Needs to be added to the templates variable in settings.py
+
+
 def bag_contents(request):
 
     bag_items = []

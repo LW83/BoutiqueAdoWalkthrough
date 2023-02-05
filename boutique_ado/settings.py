@@ -73,7 +73,7 @@ TEMPLATES = [
                 'django.template.context_processors.request', # required by allaut
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'bag.context.bag_contents', # This means anytime need to access the bag contents in any template across the entire site they'll be available to us without having to return them from a whole bunch of different views across different apps.
+                'bag.contexts.bag_contents', # This means anytime need to access the bag contents in any template across the entire site they'll be available to us without having to return them from a whole bunch of different views across different apps.
             ],
         },
     },
