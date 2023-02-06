@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, reverse, HTTPResponse
 
 # Create your views here.
 
@@ -37,3 +37,54 @@ def add_to_bag(request, item_id):
     request.session['bag'] = bag # Then overwriting item in the session with updated version 
     # print(request.session['bag']) - commented out as was only included to test items were being added to the bag
     return redirect(redirect_url)
+
+
+def adjust_bag(request, item_id):
+    """ Adjust the quantity of the specified product to the specified amount """
+
+    quantity = int(request.POST.get('quantity'))  
+    size = None
+    if 'product_size' in request.POST:
+        size = request.POST('product_size')
+
+    bag = request.session.get('bag', {}) 
+    
+    if size:
+        if quantity > 0:
+            bag[item_id]['item_by_size'][size] = quantity
+        else:
+            del bag[item_id]['item_by_size'][size]
+            if not bag[item_id]['items_by_size']: # If thats the only size they had then can remove entire item_id 
+                bag.pop(item_id)
+    else:
+        if quantity > 0:
+            bag[item_id] = quantity
+        else:
+            bag.pop(item_id)
+
+    request.session['bag'] = bag
+    return redirect(reverse('view_bag'))
+
+
+def remove_from_bag(request, item_id):
+    """ Remove the item from the shopping bag """
+
+    try:
+        size = None
+        if 'product_size' in request.POST:
+            size = request.POST('product_size')
+
+        bag = request.session.get('bag', {})
+
+        if size:
+            del bag[item_id]['item_by_size'][size] # If user is removing something with sizes want to only remove that specific size
+            if not bag[item_id]['items_by_size']: # If thats the only size they had then can remove entire item_id 
+                bag.pop(item_id)
+        else:
+            bag.pop(item_id)
+
+        request.session['bag'] = bag
+        return HTTPResponse(status=200) # Instead of returning redirect want to return a 200 HTTP response implying item successfully removed
+    
+    except Exception as e:
+        return HTTPResponse(status=500)
