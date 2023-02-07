@@ -128,7 +128,21 @@
     </header>
 
     {% if messages %}
-        <div class="message-container"></div>
+        <div class="message-container">
+            {% for message in messages %}
+                {% with message.level as level %}
+                    {% if level == 40 %}
+                        {% include 'includes/toasts/toast_error.html' %}
+                    {% elif level == 30 %}
+                        {% include 'includes/toasts/toast_warning.html' %}
+                    {% elif level == 25 %}
+                        {% include 'includes/toasts/toast_success.html' %}
+                    {% else %}
+                        {% include 'includes/toasts/toast_info.html' %}
+                    {% endif %}
+                {% endwith %}
+            {% endfor %}
+        </div>
     {% endif %}
 
     {% block page_header %}
@@ -138,6 +152,16 @@
     {% endblock %}
 
     {% block postloadjs %}
+    <!--Call Toast method from Bootstrap to show on any elements with Toast class-->
+    <!--Putting this in the base HTML template will ensure that every page that loads will 
+        immediately call the show option on all toasts that have been rendered in the messages 
+        container-->
+    <!--Explains why we've been including block.super in our templates when overriding the 
+        post loadjs block. By doing that we ensure that any JavaScript we've written in the 
+        templates that extend this one won't overwrite this call to show all the toasts.-->
+    <script type="text/javascript">
+        $('.toast').toast('show'); 
+    </script>
     {% endblock %}
 
 </body>

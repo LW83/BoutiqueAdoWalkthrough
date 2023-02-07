@@ -79,6 +79,11 @@ TEMPLATES = [
     },
 ]
 
+# to tell it to store messages in the session this is often not a required step 
+# because there is a default which falls back to this storage method but due to 
+# the use of git pod in these recordings it's required for us
+MESSAGE_STORAGE = 'django.contrib.messages.storage.session.Sessionstorage'
+
 AUTHENTICATION_BACKENDS = [
     # Needed to login by username in Django admin, regardless of `allauth`
     'django.contrib.auth.backends.ModelBackend',
