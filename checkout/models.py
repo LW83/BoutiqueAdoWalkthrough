@@ -22,6 +22,8 @@ class Order(models.Model):
     delivery_cost = models.DecimalField(max_digits=6, decimal_places=2, null=False, default=0)
     order_total = models.DecimalField(max_digits=10, decimal_places=2, null=False, default=0)
     grand_total = models.DecimalField(max_digits=10, decimal_places=2, null=False, default=0)
+    original_bag = models.TextField(null=False, blank=False, default='')
+    stripe_pid = models.CharField(max_length=254, null=False, blank=False, default='') # Added to ensure customer can deliberately order same thing twice as part of separate orders
 
     def _generate_order_number(self): # Model method - prepended with an underscore to indicuate its a private method only used inside this class
         """
