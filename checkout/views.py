@@ -1,4 +1,5 @@
-from django.shortcuts import render, redirect, reverse, get_object_or_404
+from django.shortcuts import render, redirect, reverse, get_object_or_404, HttpResponse
+from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.conf import settings
 
@@ -8,6 +9,38 @@ from products.models import Product
 from bag.contexts import bag_contents
 
 import stripe
+import json
+
+'''
+We don't have a way to determine in the webhook whether
+the user had the save info box checked.
+Luckily there's a place we can add that to the payment intent
+in a key called metadata, but we have to do it from the
+server-side because the confirm card payment method doesn't support adding it.
+Need to write a simple view to take care of it.
+What's gonna happen here is before we call the confirm card payment method in the
+Stripe JavaScript, we'll make a post request to this view and give it the
+client secret from the payment intent. If we split that at the word secret the
+first part of it will be the payment intent Id, so I'll store that in a variable called pid.
+Then I'll set up stripe with the secret key so we can modify the payment intent.
+To do it all we have to do is call stripe.PaymentIntent.modify
+give it the pid, and tell it what we want to modify in our case we'll add some metadata.
+'''
+@require_POST  # As expect only the post method here
+def cache_checkout_data(request):
+    try:
+        pid = request.POST.get('client_secret').split('_secret')[0]
+        stripe.api_key = settings.STRIPE_SECRET_KEY
+        stripe.PaymentIntent.modify(pid, metadata={
+            'bag': json.dumps(request.session.get('bag', {})), # Using JSON to add bag to metadata
+            'save_info': request.POST.get('save_info'),  # Whether they want to save their info
+            'username': request.user,  # User placing order
+        })
+        return HttpResponse(status=200)
+    except Exception as e:
+        messages.error(request, 'Sorry, your payment cannot be \
+            processed right now. Please try again later.')
+        return HttpResponse(content=e, status=400)
 
 
 def checkout(request):
